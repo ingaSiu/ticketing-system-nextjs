@@ -1,25 +1,11 @@
-'use client';
-
-import { useActionState, useEffect } from 'react';
-
-import Link from 'next/link';
-import { createTicket } from '@/actions/ticket.actions';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import NewTicketForm from './ticket-form';
 
 const NewTicketPage = () => {
-  const [state, formAction] = useActionState(createTicket, { success: false, message: '' });
-
-  const router = useRouter();
-
-  useEffect(() => {
-    if (state.success) {
-      toast.success('Ticket submitted successfully');
-      router.push('/tickets');
-    }
-  }, [state.success, router]);
-
-  return <div>hello</div>;
+  return (
+    <div className="min-h-screen bg-blue-50 flex items-center justify-center px-4">
+      <NewTicketForm />
+    </div>
+  );
 };
 
 export default NewTicketPage;
