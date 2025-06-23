@@ -52,3 +52,23 @@ export async function setAuthCookie(token: string) {
     logEvent('Failed to set cookie', 'auth', { token }, 'error', error);
   }
 }
+
+// Get auth token from cookie
+
+export async function getAuthCookie() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(cookieName);
+
+  return token?.value;
+}
+
+// Remove auth token cookie
+
+export async function removeAuthCookie() {
+  try {
+    const cookieStore = await cookies();
+    cookieStore.delete(cookieName);
+  } catch (error) {
+    logEvent('Failed to remove the auth cookie', 'auth', {}, 'error', error);
+  }
+}
