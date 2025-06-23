@@ -34,3 +34,21 @@ export async function verifyAuthToken<T>(token: string): Promise<T> {
     throw new Error('Token decryption failed');
   }
 }
+
+// Set the auth cookie
+
+export async function setAuthCookie(token: string) {
+  try {
+    const cookieStore = await cookies();
+
+    cookieStore.set(cookieName, token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 Days
+    });
+  } catch (error) {
+    logEvent('Failed to set cookie', 'auth', { token }, 'error', error);
+  }
+}
