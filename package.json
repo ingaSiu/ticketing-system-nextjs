@@ -10,8 +10,11 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@prisma/client": "^6.10.0",
+    "@prisma/client": "^6.10.1",
     "@sentry/nextjs": "^9.30.0",
+    "bcryptjs": "^3.0.2",
+    "cookie": "^1.0.2",
+    "jose": "^6.0.11",
     "next": "15.3.3",
     "prisma": "^6.10.0",
     "react": "^19.0.0",
