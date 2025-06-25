@@ -1,5 +1,6 @@
 'use server';
 
+import { getCurrentUser } from '@/lib/current-user';
 import { logEvent } from '@/utils/sentry';
 import { prisma } from '@/db/prisma';
 import { revalidatePath } from 'next/cache';
@@ -9,6 +10,16 @@ export const createTicket = async (
   formData: FormData,
 ): Promise<{ success: boolean; message: string }> => {
   try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      logEvent('Unauthorized ticket creation attempt', 'ticket', {}, 'warning');
+
+      return {
+        success: false,
+        message: 'You must be logged in to create a ticket',
+      };
+    }
     const subject = formData.get('subject') as string;
     const description = formData.get('description') as string;
     const priority = formData.get('priority') as string;
@@ -25,6 +36,9 @@ export const createTicket = async (
         subject,
         description,
         priority,
+        user: {
+          connect: { id: user.id },
+        },
       },
     });
     logEvent(`Ticket created successfully: ${ticket.id}`, 'ticket', { ticketId: ticket.id }, 'info');
