@@ -1,6 +1,6 @@
 'use server';
 
-import { setAuthCookie, signAuthToken } from '@/lib/auth';
+import { removeAuthCookie, setAuthCookie, signAuthToken } from '@/lib/auth';
 
 import bcrypt from 'bcryptjs';
 import { logEvent } from '@/utils/sentry';
@@ -68,5 +68,23 @@ export async function registerUser(
       success: false,
       message: 'Something went wrong, please try again',
     };
+  }
+}
+
+// Log user out and remove auth cookie
+
+export async function logoutUser(): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    await removeAuthCookie();
+
+    logEvent('User logged out successfully', 'auth', {}, 'info');
+
+    return { success: true, message: 'Logout successfull' };
+  } catch (error) {
+    logEvent('Unexpected error during logout', 'auth', {}, 'error', error);
+    return { success: false, message: 'Logout failed. Please try again.' };
   }
 }
