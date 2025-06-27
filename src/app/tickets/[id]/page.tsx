@@ -1,5 +1,6 @@
 import CloseTicketButton from '@/components/CloseTicketButton';
 import Link from 'next/link';
+import { getCurrentUser } from '@/lib/current-user';
 import { getPriorityClass } from '@/utils/ui';
 import { getTicketById } from '@/actions/ticket.actions';
 import { logEvent } from '@/utils/sentry';
@@ -8,10 +9,13 @@ import { notFound } from 'next/navigation';
 const TicketDetailsPage = async (props: { params: Promise<{ id: string }> }) => {
   const { id } = await props.params;
   const ticket = await getTicketById(id);
+  const user = await getCurrentUser();
 
   if (!ticket) {
     notFound();
   }
+
+  const isAdmin = user?.role === 'ADMIN';
 
   logEvent('Viewing ticket details', 'ticket', { ticketId: ticket.id }, 'info');
   return (
@@ -41,7 +45,9 @@ const TicketDetailsPage = async (props: { params: Promise<{ id: string }> }) => 
           ← Back to Tickets
         </Link>
 
-        {ticket.status !== 'Closed' && <CloseTicketButton ticketId={ticket.id} isClosed={ticket.status === 'Closed'} />}
+        {isAdmin && ticket.status !== 'Closed' && (
+          <CloseTicketButton ticketId={ticket.id} isClosed={ticket.status === 'Closed'} />
+        )}
       </div>
     </div>
   );
