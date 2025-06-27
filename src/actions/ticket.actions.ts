@@ -128,6 +128,14 @@ export async function closeTicket(
     return { success: false, message: 'Unauthorized' };
   }
 
+  if (user.role !== 'ADMIN') {
+    logEvent('Non-admin tried to close ticket', 'ticket', { userId: user.id }, 'warning');
+    return {
+      success: false,
+      message: 'Only admins can close tickets',
+    };
+  }
+
   const ticket = await prisma.ticket.findUnique({
     where: { id: ticketId },
   });
