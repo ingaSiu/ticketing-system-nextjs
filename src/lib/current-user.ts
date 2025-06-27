@@ -4,6 +4,7 @@ import { prisma } from '@/db/prisma';
 
 type AuthPayload = {
   userId: string;
+  role: 'USER' | 'ADMIN';
 };
 
 export async function getCurrentUser() {
@@ -21,6 +22,7 @@ export async function getCurrentUser() {
         id: true,
         email: true,
         name: true,
+        role: true,
       },
     });
 
