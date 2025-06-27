@@ -70,12 +70,15 @@ export const getTickets = async () => {
       logEvent('Unauthorized access to ticket list', 'ticket', {}, 'warning');
       return [];
     }
+
+    const isAdmin = user.role === 'ADMIN';
+
     const tickets = await prisma.ticket.findMany({
-      where: { userId: user.id },
+      where: isAdmin ? {} : { userId: user.id },
       orderBy: { createdAt: 'desc' },
     });
 
-    logEvent('Fetched ticket list', 'ticket', { count: tickets.length }, 'info');
+    logEvent('Fetched ticket list', 'ticket', { count: tickets.length, isAdmin }, 'info');
 
     return tickets;
   } catch (error) {
