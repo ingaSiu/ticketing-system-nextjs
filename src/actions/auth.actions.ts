@@ -44,18 +44,20 @@ export async function registerUser(
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
+    const isAdmin = email === process.env.ADMIN_EMAIL;
 
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
+        role: isAdmin ? 'ADMIN' : 'USER',
       },
     });
 
     // Sign and set auth token
 
-    const token = await signAuthToken({ userId: user.id });
+    const token = await signAuthToken({ userId: user.id, role: user.role });
     await setAuthCookie(token);
 
     logEvent(`User registered succcessfully: ${email}`, 'auth', { userId: user.id, email }, 'info');
