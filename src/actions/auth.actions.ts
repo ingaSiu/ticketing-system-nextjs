@@ -3,8 +3,10 @@
 import { removeAuthCookie, setAuthCookie, signAuthToken } from '@/lib/auth';
 
 import bcrypt from 'bcryptjs';
+import { getCurrentUser } from '@/lib/current-user';
 import { logEvent } from '@/utils/sentry';
 import { prisma } from '@/db/prisma';
+import { revalidatePath } from 'next/cache';
 
 type ResponseResult = {
   success: boolean;
@@ -13,11 +15,7 @@ type ResponseResult = {
 
 // Register new user
 
-export async function registerUser(
-  prevState: ResponseResult,
-
-  formData: FormData,
-): Promise<ResponseResult> {
+export async function registerUser(prevState: ResponseResult, formData: FormData): Promise<ResponseResult> {
   try {
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
@@ -126,4 +124,31 @@ export async function loginUser(prevState: ResponseResult, formData: FormData): 
     logEvent('Unexpected error during login', 'auth', {}, 'error', error);
     return { success: false, message: 'Error during log in' };
   }
+}
+
+export async function updateUserProfile(prevState: ResponseResult, formData: FormData): Promise<ResponseResult> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { success: false, message: 'Unauthorized' };
+  }
+  const name = formData.get('name') as string;
+  const password = formData.get('password') as string;
+  const confirmPassword = formData.get('confirmPassword') as string;
+
+  if (password && password !== confirmPassword) {
+    return { success: false, message: 'Passwords do not match' };
+  }
+
+  const updateData: { name?: string; password?: string } = {};
+
+  if (name) updateData.name = name;
+  if (password) updateData.password = await bcrypt.hash(password, 10);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: updateData,
+  });
+
+  revalidatePath('/profile');
+  return { success: true, message: 'Profile updated successfully' };
 }
