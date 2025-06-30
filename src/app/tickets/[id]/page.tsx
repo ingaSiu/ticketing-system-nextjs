@@ -29,6 +29,11 @@ const TicketDetailsPage = async (props: { params: Promise<{ id: string }> }) => 
         </div>
 
         <div className="text-gray-700">
+          <h2 className="text-lg font-semibold mb-2">Issued by</h2>
+          <p>{user ? user.name : 'Unknown'}</p>
+        </div>
+
+        <div className="text-gray-700">
           <h2 className="text-lg font-semibold mb-2">Priority</h2>
           <p className={getPriorityClass(ticket.priority)}>{ticket.priority}</p>
         </div>
