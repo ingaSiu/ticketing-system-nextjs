@@ -139,10 +139,17 @@ export async function updateUserProfile(prevState: ResponseResult, formData: For
     return { success: false, message: 'Passwords do not match' };
   }
 
+  const isNameChanged = name && name !== user.name;
+  const isPasswordChanged = password.length > 0;
+
+  if (!isNameChanged && !isPasswordChanged) {
+    return { success: false, message: 'No changes to update' };
+  }
+
   const updateData: { name?: string; password?: string } = {};
 
-  if (name) updateData.name = name;
-  if (password) updateData.password = await bcrypt.hash(password, 10);
+  if (isNameChanged) updateData.name = name;
+  if (isPasswordChanged) updateData.password = await bcrypt.hash(password, 10);
 
   await prisma.user.update({
     where: { id: user.id },
