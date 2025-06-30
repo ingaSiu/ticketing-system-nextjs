@@ -17,10 +17,16 @@ const Navbar = async () => {
             <Link href="/tickets/new" className="hover:underline text-gray-700 transition">
               New Ticket
             </Link>
+            {user.role === 'ADMIN' ? (
+              <Link href="/admin" className="hover:underline text-gray-700 transition">
+                Dashboard
+              </Link>
+            ) : (
+              <Link href="/tickets" className="hover:underline text-gray-700 transition">
+                My Tickets
+              </Link>
+            )}
 
-            <Link href="/tickets" className="hover:underline text-gray-700 transition">
-              My Tickets
-            </Link>
             <LogoutButton />
           </>
         ) : (
