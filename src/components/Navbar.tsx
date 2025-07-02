@@ -22,9 +22,14 @@ const Navbar = async () => {
                 Dashboard
               </Link>
             ) : (
-              <Link href="/tickets" className="hover:underline text-gray-700 transition">
-                My Tickets
-              </Link>
+              <>
+                <Link href="/tickets" className="hover:underline text-gray-700 transition">
+                  My Tickets
+                </Link>
+                <Link href="/user" className="hover:underline text-gray-700 transition">
+                  My Page
+                </Link>
+              </>
             )}
 
             <LogoutButton />
