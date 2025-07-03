@@ -1,5 +1,6 @@
 'use server';
 
+import { TicketFilters } from '@/types/ticket';
 import { getCurrentUser } from '@/lib/current-user';
 import { logEvent } from '@/utils/sentry';
 import { prisma } from '@/db/prisma';
@@ -63,7 +64,7 @@ export const createTicket = async (
   }
 };
 
-export const getTickets = async () => {
+export const getTickets = async (filters?: TicketFilters) => {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -73,8 +74,23 @@ export const getTickets = async () => {
 
     const isAdmin = user.role === 'ADMIN';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = isAdmin ? {} : { userId: user.id };
+
+    if (filters) {
+      if (filters.priority && filters.priority !== '') {
+        where.priority = filters.priority;
+      }
+      if (filters.status && filters.status !== '') {
+        where.status = filters.status;
+      }
+      if (filters.userId && filters.userId !== '' && isAdmin) {
+        where.userId = filters.userId;
+      }
+    }
+
     const tickets = await prisma.ticket.findMany({
-      where: isAdmin ? {} : { userId: user.id },
+      where: where,
       orderBy: { createdAt: 'desc' },
     });
 
