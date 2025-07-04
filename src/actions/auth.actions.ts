@@ -116,7 +116,7 @@ export async function loginUser(prevState: ResponseResult, formData: FormData): 
       return { success: false, message: 'Invalid email or password' };
     }
 
-    const token = await signAuthToken({ userId: user.id });
+    const token = await signAuthToken({ userId: user.id, role: user.role });
     await setAuthCookie(token);
 
     return { success: true, message: 'Login successful' };
