@@ -16,6 +16,7 @@ const TicketDetailsPage = async (props: { params: Promise<{ id: string }> }) => 
   }
 
   const isAdmin = user?.role === 'ADMIN';
+  const shouldShowButton = isAdmin && ticket.status !== 'Closed';
 
   logEvent('Viewing ticket details', 'ticket', { ticketId: ticket.id }, 'info');
   return (
@@ -50,9 +51,7 @@ const TicketDetailsPage = async (props: { params: Promise<{ id: string }> }) => 
           ← Back to Tickets
         </Link>
 
-        {isAdmin && ticket.status !== 'Closed' && (
-          <CloseTicketButton ticketId={ticket.id} isClosed={ticket.status === 'Closed'} />
-        )}
+        {shouldShowButton && <CloseTicketButton ticketId={ticket.id} isClosed={ticket.status === 'Closed'} />}
       </div>
     </div>
   );
