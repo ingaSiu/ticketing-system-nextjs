@@ -27,9 +27,15 @@ const TicketFilters = () => {
     router.push(`?${createQueryString(filterName, value)}`);
   };
 
+  const clearFilters = () => {
+    router.push(window.location.pathname);
+  };
+
   const currentPriority = searchParams.get('priority') || '';
   const currentStatus = searchParams.get('status') || '';
   const currentSearch = searchParams.get('search') || '';
+
+  const hasActiveFilters = currentPriority || currentStatus || currentSearch;
   return (
     <div className="space-y-4">
       <div className="w-full">
@@ -70,6 +76,17 @@ const TicketFilters = () => {
             <option value="Closed">Closed</option>
           </select>
         </div>
+
+        {hasActiveFilters && (
+          <div className="flex flex-col justify-end">
+            <button
+              onClick={clearFilters}
+              className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
