@@ -84,8 +84,21 @@ export const getTickets = async (filters?: TicketFilters) => {
       if (filters.status && filters.status !== '') {
         where.status = filters.status;
       }
-      if (filters.userId && filters.userId !== '' && isAdmin) {
-        where.userId = filters.userId;
+      if (filters.search && filters.search !== '') {
+        where.OR = [
+          {
+            subject: {
+              contains: filters.search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            description: {
+              contains: filters.search,
+              mode: 'insensitive',
+            },
+          },
+        ];
       }
     }
 
