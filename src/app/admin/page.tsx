@@ -10,6 +10,7 @@ type DashboardPageProps = {
     priority?: string;
     status?: string;
     userId?: string;
+    search?: string;
   };
 };
 
@@ -24,6 +25,7 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
   const filters: TicketFiltersType = {};
   if (params.priority) filters.priority = params.priority;
   if (params.status) filters.status = params.status;
+  if (params.search) filters.search = params.search;
 
   const tickets = await getTickets(filters);
   return (
