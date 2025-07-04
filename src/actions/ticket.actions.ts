@@ -156,12 +156,12 @@ export async function closeTicket(
     where: { id: ticketId },
   });
 
-  if (!ticket || ticket.userId !== user.id) {
-    logEvent('Unauthorized ticket close attempt', 'ticket', { ticketId, userId: user.id }, 'warning');
+  if (!ticket) {
+    logEvent('Ticket not found', 'ticket', { ticketId, userId: user.id }, 'warning');
 
     return {
       success: false,
-      message: 'You are not authorized to close this ticket',
+      message: 'Ticket not found',
     };
   }
 
