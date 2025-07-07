@@ -3,10 +3,17 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useCallback } from 'react';
+import useDebounceSearch from '@/hooks/useDebounceSearch';
 
 const TicketFilters = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const { searchValue, setSearchValue, isSearching, clearSearch } = useDebounceSearch({
+    initialValue: searchParams.get('search') || '',
+    delay: 300,
+    onSearch: (value) => handleFilterChange('search', value),
+  });
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -28,6 +35,7 @@ const TicketFilters = () => {
   };
 
   const clearFilters = () => {
+    clearSearch();
     router.push(window.location.pathname);
   };
 
@@ -40,13 +48,30 @@ const TicketFilters = () => {
     <div className="space-y-4">
       <div className="w-full">
         <label className="text-sm font-medium text-gray-700 mb-1 block">Search Tickets</label>
-        <input
-          type="text"
-          placeholder="Search by subject or description..."
-          value={currentSearch}
-          onChange={(e) => handleFilterChange('search', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by subject or description..."
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          {searchValue && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        {isSearching && (
+          <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+            <span className="animate-pulse">🔍</span>
+            Searching...
+          </p>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg">
