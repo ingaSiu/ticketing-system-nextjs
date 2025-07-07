@@ -1,6 +1,7 @@
 import TicketFilters from '@/components/TicketFilters';
 import { TicketFilters as TicketFiltersType } from '@/types/ticket';
 import TicketItem from '@/components/TicketItem';
+import { getAllUsers } from '@/actions/user.actions';
 import { getCurrentUser } from '@/lib/current-user';
 import { getTickets } from '@/actions/ticket.actions';
 import { redirect } from 'next/navigation';
@@ -26,13 +27,14 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
   if (params.priority) filters.priority = params.priority;
   if (params.status) filters.status = params.status;
   if (params.search) filters.search = params.search;
+  if (params.userId) filters.userId = params.userId;
 
-  const tickets = await getTickets(filters);
+  const [tickets, users] = await Promise.all([getTickets(filters), getAllUsers()]);
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard - Tickets</h1>
 
-      <TicketFilters />
+      <TicketFilters users={users} />
 
       <div className="mb-4 text-sm text-gray-600">
         Showing {tickets.length} ticket{tickets.length !== 1 ? 's' : ''}
