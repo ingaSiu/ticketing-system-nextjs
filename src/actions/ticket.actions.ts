@@ -84,6 +84,9 @@ export const getTickets = async (filters?: TicketFilters) => {
       if (filters.status && filters.status !== '') {
         where.status = filters.status;
       }
+      if (filters.userId && filters.userId !== '') {
+        where.userId = filters.userId;
+      }
       if (filters.search && filters.search !== '') {
         where.OR = [
           {
@@ -105,6 +108,15 @@ export const getTickets = async (filters?: TicketFilters) => {
     const tickets = await prisma.ticket.findMany({
       where: where,
       orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
 
     logEvent('Fetched ticket list', 'ticket', { count: tickets.length, isAdmin }, 'info');
@@ -121,6 +133,15 @@ export const getTicketById = async (id: string) => {
   try {
     const ticket = await prisma.ticket.findUnique({
       where: { id: Number(id) },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
 
     if (!ticket) {
@@ -136,7 +157,6 @@ export const getTicketById = async (id: string) => {
 };
 
 //Close ticket
-
 export async function closeTicket(
   prevState: { success: boolean; message: string },
   formData: FormData,
