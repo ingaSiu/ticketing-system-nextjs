@@ -5,7 +5,17 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 import useDebounceSearch from '@/hooks/useDebounceSearch';
 
-const TicketFilters = () => {
+interface User {
+  id: string;
+  name: string | null;
+  email: string;
+}
+
+interface TicketFiltersProps {
+  users?: User[];
+}
+
+const TicketFilters = ({ users = [] }: TicketFiltersProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -42,8 +52,11 @@ const TicketFilters = () => {
   const currentPriority = searchParams.get('priority') || '';
   const currentStatus = searchParams.get('status') || '';
   const currentSearch = searchParams.get('search') || '';
+  const currentUserId = searchParams.get('userId') || '';
 
-  const hasActiveFilters = currentPriority || currentStatus || currentSearch;
+  const hasActiveFilters = currentPriority || currentStatus || currentSearch || currentUserId;
+
+  const selectedUser = users.find((user) => user.id === currentUserId);
   return (
     <div className="space-y-4">
       <div className="w-full">
@@ -102,6 +115,24 @@ const TicketFilters = () => {
           </select>
         </div>
 
+        {users.length > 0 && (
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700 mb-1">User</label>
+            <select
+              value={currentUserId}
+              onChange={(e) => handleFilterChange('userId', e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Users</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name || user.email}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {hasActiveFilters && (
           <div className="flex flex-col justify-end">
             <button
@@ -125,6 +156,12 @@ const TicketFilters = () => {
           )}
           {currentStatus && (
             <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">Status: {currentStatus}</span>
+          )}
+
+          {currentUserId && selectedUser && (
+            <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
+              User: {selectedUser.name || selectedUser.email}
+            </span>
           )}
         </div>
       )}
