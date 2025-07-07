@@ -1,6 +1,13 @@
+import bcrypt from 'bcryptjs';
 import { getCurrentUser } from '@/lib/current-user';
 import { logEvent } from '@/utils/sentry';
 import { prisma } from '@/db/prisma';
+import { revalidatePath } from 'next/cache';
+
+type ResponseResult = {
+  success: boolean;
+  message: string;
+};
 
 export const getAllUsers = async () => {
   try {
@@ -30,3 +37,37 @@ export const getAllUsers = async () => {
     return [];
   }
 };
+
+export async function updateUserProfile(prevState: ResponseResult, formData: FormData): Promise<ResponseResult> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { success: false, message: 'Unauthorized' };
+  }
+  const name = formData.get('name') as string;
+  const password = formData.get('password') as string;
+  const confirmPassword = formData.get('confirmPassword') as string;
+
+  if (password && password !== confirmPassword) {
+    return { success: false, message: 'Passwords do not match' };
+  }
+
+  const isNameChanged = name && name !== user.name;
+  const isPasswordChanged = password.length > 0;
+
+  if (!isNameChanged && !isPasswordChanged) {
+    return { success: false, message: 'No changes to update' };
+  }
+
+  const updateData: { name?: string; password?: string } = {};
+
+  if (isNameChanged) updateData.name = name;
+  if (isPasswordChanged) updateData.password = await bcrypt.hash(password, 10);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: updateData,
+  });
+
+  revalidatePath('/profile');
+  return { success: true, message: 'Profile updated successfully' };
+}

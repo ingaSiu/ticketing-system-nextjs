@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from 'react';
 
 import { toast } from 'sonner';
-import { updateUserProfile } from '@/actions/auth.actions';
+import { updateUserProfile } from '@/actions/user.actions';
 import { useRouter } from 'next/navigation';
 
 const UpdateProfileForm = ({ user }: { user: { name?: string | null; email: string } }) => {
