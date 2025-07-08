@@ -54,6 +54,51 @@ export const getUserById = async (userId: string) => {
   }
 };
 
+export const getUserStats = async (userId: string) => {
+  try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return null;
+    }
+
+    if (currentUser.id !== userId && currentUser.role !== 'ADMIN') {
+      return null;
+    }
+
+    const stats = await prisma.ticket.groupBy({
+      by: ['status', 'priority'],
+      where: { userId },
+      _count: {
+        id: true,
+      },
+    });
+
+    const totalTickets = await prisma.ticket.count({
+      where: { userId },
+    });
+
+    const statusCounts = stats.reduce((acc, stat) => {
+      acc[stat.status] = (acc[stat.status] || 0) + stat._count.id;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const priorityCounts = stats.reduce((acc, stat) => {
+      acc[stat.priority] = (acc[stat.priority] || 0) + stat._count.id;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      totalTickets,
+      statusCounts,
+      priorityCounts,
+    };
+  } catch (error) {
+    logEvent('Error fetching user stats', 'user', { userId }, 'error', error);
+    return null;
+  }
+};
+
 export const getAllUsers = async () => {
   try {
     const currentUser = await getCurrentUser();
