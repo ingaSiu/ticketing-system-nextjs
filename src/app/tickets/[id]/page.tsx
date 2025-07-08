@@ -30,8 +30,32 @@ const TicketDetailsPage = async (props: { params: Promise<{ id: string }> }) => 
         </div>
 
         <div className="text-gray-700">
-          <h2 className="text-lg font-semibold mb-2">Issued by</h2>
-          <p>{user ? user.name : 'Unknown'}</p>
+          <h2 className="text-lg font-semibold mb-2">Created by</h2>
+          {ticket.user ? (
+            <Link
+              href={`/users/${ticket.user.id}`}
+              className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+            >
+              {ticket.user.name || ticket.user.email}
+            </Link>
+          ) : (
+            <p className="text-gray-500">Unknown user</p>
+          )}
+        </div>
+
+        <div className="text-gray-700">
+          <h2 className="text-lg font-semibold mb-2">Status</h2>
+          <span
+            className={`px-3 py-1 rounded-full text-sm font-medium ${
+              ticket.status === 'Open'
+                ? 'bg-green-100 text-green-800'
+                : ticket.status === 'Closed'
+                ? 'bg-gray-100 text-gray-800'
+                : 'bg-yellow-100 text-yellow-800'
+            }`}
+          >
+            {ticket.status}
+          </span>
         </div>
 
         <div className="text-gray-700">
@@ -43,6 +67,13 @@ const TicketDetailsPage = async (props: { params: Promise<{ id: string }> }) => 
           <h2 className="text-lg font-semibold mb-2">Created At</h2>
           <p>{new Date(ticket.createdAt).toLocaleString()}</p>
         </div>
+
+        {ticket.updatedAt !== ticket.createdAt && (
+          <div className="text-gray-700">
+            <h2 className="text-lg font-semibold mb-2">Last Updated</h2>
+            <p>{new Date(ticket.updatedAt).toLocaleString()}</p>
+          </div>
+        )}
 
         <Link
           href="/tickets"
