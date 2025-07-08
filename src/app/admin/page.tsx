@@ -47,7 +47,7 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
       ) : (
         <div className="space-y-4 max-w-2xl mx-auto">
           {tickets.map((ticket) => (
-            <TicketItem key={ticket.id} ticket={ticket} />
+            <TicketItem key={ticket.id} ticket={ticket} showUser={true} />
           ))}
         </div>
       )}
