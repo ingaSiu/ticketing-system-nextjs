@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+'use server';
+
 import bcrypt from 'bcryptjs';
 import { getCurrentUser } from '@/lib/current-user';
 import { logEvent } from '@/utils/sentry';
@@ -7,6 +10,48 @@ import { revalidatePath } from 'next/cache';
 type ResponseResult = {
   success: boolean;
   message: string;
+};
+
+export const getUserById = async (userId: string) => {
+  try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      logEvent('Unauthorized access to user details', 'user', { userId }, 'warning');
+      return null;
+    }
+
+    // Only allow users to view their own profile or admins to view any profile
+    if (currentUser.id !== userId && currentUser.role !== 'ADMIN') {
+      logEvent('Unauthorized access to user profile', 'user', { userId, currentUserId: currentUser.id }, 'warning');
+      return null;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        tickets: {
+          orderBy: { createdAt: 'desc' },
+          take: 50, // Limit to recent 50 tickets
+        },
+      },
+    });
+
+    if (!user) {
+      logEvent('User not found', 'user', { userId }, 'warning');
+      return null;
+    }
+
+    // Don't return password
+    const { password, ...userWithoutPassword } = user;
+
+    logEvent('User profile accessed', 'user', { userId, ticketCount: user.tickets.length }, 'info');
+
+    return userWithoutPassword;
+  } catch (error) {
+    logEvent('Error fetching user details', 'user', { userId }, 'error', error);
+    return null;
+  }
 };
 
 export const getAllUsers = async () => {
