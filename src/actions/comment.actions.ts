@@ -74,3 +74,27 @@ export const createComment = async (
     };
   }
 };
+
+export const getCommentsByTicketId = async (ticketId: string) => {
+  try {
+    const comments = await prisma.comment.findMany({
+      where: { ticketId: Number(ticketId) },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    logEvent('Fetched comments for ticket', 'comment', { ticketId, count: comments.length }, 'info');
+    return comments;
+  } catch (error) {
+    logEvent('Error fetching comments', 'comment', { ticketId }, 'error', error);
+    return [];
+  }
+};
