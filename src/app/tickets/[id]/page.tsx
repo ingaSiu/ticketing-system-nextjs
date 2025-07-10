@@ -1,3 +1,5 @@
+import { notFound, redirect } from 'next/navigation';
+
 import CloseTicketButton from '@/components/CloseTicketButton';
 import CommentForm from './comment-form';
 import CommentList from '@/components/CommentList';
@@ -6,12 +8,13 @@ import { getCurrentUser } from '@/lib/current-user';
 import { getPriorityClass } from '@/utils/ui';
 import { getTicketById } from '@/actions/ticket.actions';
 import { logEvent } from '@/utils/sentry';
-import { notFound } from 'next/navigation';
 
 const TicketDetailsPage = async (props: { params: Promise<{ id: string }> }) => {
   const { id } = await props.params;
   const ticket = await getTicketById(id);
   const user = await getCurrentUser();
+
+  if (!user) redirect('/login');
 
   if (!ticket) {
     notFound();
