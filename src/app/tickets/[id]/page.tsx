@@ -89,11 +89,12 @@ const TicketDetailsPage = async (props: { params: Promise<{ id: string }> }) => 
 
         {shouldShowButton && <CloseTicketButton ticketId={ticket.id} isClosed={ticket.status === 'Closed'} />}
 
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-8 space-y-6">
-          <CommentList comments={ticket.comments} />
-
-          {isAdmin && <CommentForm ticketId={ticket.id.toString()} />}
-        </div>
+        {isAdmin && (
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-8 space-y-6">
+            <CommentList comments={ticket.comments} />
+            <CommentForm ticketId={ticket.id.toString()} />
+          </div>
+        )}
       </div>
     </div>
   );
