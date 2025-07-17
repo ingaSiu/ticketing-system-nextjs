@@ -1,15 +1,20 @@
+import { notFound, redirect } from 'next/navigation';
+
 import CloseTicketButton from '@/components/CloseTicketButton';
+import CommentForm from './comment-form';
+import CommentList from '@/components/CommentList';
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/current-user';
 import { getPriorityClass } from '@/utils/ui';
 import { getTicketById } from '@/actions/ticket.actions';
 import { logEvent } from '@/utils/sentry';
-import { notFound } from 'next/navigation';
 
 const TicketDetailsPage = async (props: { params: Promise<{ id: string }> }) => {
   const { id } = await props.params;
   const ticket = await getTicketById(id);
   const user = await getCurrentUser();
+
+  if (!user) redirect('/login');
 
   if (!ticket) {
     notFound();
@@ -83,6 +88,13 @@ const TicketDetailsPage = async (props: { params: Promise<{ id: string }> }) => 
         </Link>
 
         {shouldShowButton && <CloseTicketButton ticketId={ticket.id} isClosed={ticket.status === 'Closed'} />}
+
+        {isAdmin && (
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-8 space-y-6">
+            <CommentList comments={ticket.comments} />
+            <CommentForm ticketId={ticket.id.toString()} />
+          </div>
+        )}
       </div>
     </div>
   );

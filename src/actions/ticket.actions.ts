@@ -141,6 +141,18 @@ export const getTicketById = async (id: string) => {
             email: true,
           },
         },
+        comments: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
       },
     });
 
